@@ -1,0 +1,18 @@
+[submodule ".submodules/CuteControllers"]
+	path = .submodules/CuteControllers
+	url = https://github.com/tylermenezes/CuteControllers.git
+[submodule ".submodules/TinyDb"]
+	path = .submodules/TinyDb
+	url = https://github.com/tylermenezes/TinyDb.git
+[submodule ".submodules/Twig"]
+	path = .submodules/Twig
+	url = https://github.com/fabpot/Twig.git
+[submodule ".submodules/SplClassLoader"]
+	path = .submodules/SplClassLoader
+	url = https://gist.github.com/426304.git
+[submodule ".submodules/twilio-php"]
+	path = .submodules/twilio-php
+	url = https://github.com/twilio/twilio-php.git
+[submodule ".submodules/LeanLanguages"]
+	path = .submodules/LeanLanguages
+	url = https://github.com/tylermenezes/LeanLanguages.git

@@ -1,0 +1,34 @@
+{
+    "database": {
+        "read": {
+            "type": "mysql",
+            "username": "root",
+            "password": null,
+            "host": "localhost",
+            "db": "openhack"
+        },
+        "write": null
+    },
+
+    "debug": false,
+
+    "twig" {
+        "cache_dir": null
+    },
+
+    "twig" {
+        "cache": null
+    },
+
+    "language": "en-US",
+
+    "twilio": {
+        "account_sid": null,
+        "token": null
+    },
+
+    "stripe": {
+        "public": null,
+        "private": null
+    }
+}
