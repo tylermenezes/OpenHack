@@ -21,12 +21,7 @@ class Application
             'includes' => pathify($webroot, 'Includes'),
             'plugins' => pathify($webroot, 'Plugins'),
             'controllers' => pathify($webroot, 'Includes', 'OpenHack', 'Controllers'),
-            'assets' => (object)[
-                'js' => pathify($webroot, 'assets', 'js'),
-                'css' => pathify($webroot, 'assets', 'css'),
-                'img' => pathify($webroot, 'assets', 'img'),
-                'tpl' => pathify($webroot, 'assets', 'tpl')
-            ]
+            'themes' => pathify($webroot, 'themes')
         ];
     }
 
@@ -46,7 +41,7 @@ class Application
     private static function load_spl_loader()
     {
         require_once(pathify(static::$dir->includes, 'SplClassLoader.php'));
-        static::$spl_loader = new SplClassLoader(NULL, static::$dir->includes);
+        static::$spl_loader = new \SplClassLoader(null, static::$dir->includes);
         static::$spl_loader->register();
     }
 
@@ -58,24 +53,52 @@ class Application
         $twig_config = [];
 
         // Enable debugging if the debug flag is on
-        if (static::$config->debug === TRUE) {
-            $twig_config['debug'] = TRUE;
+        if (static::$config->debug === true) {
+            $twig_config['debug'] = true;
         }
 
         // Enable caching if set
-        if (static::$config->twig->cache_dir !== NULL) {
+        if (static::$config->twig->cache_dir !== null) {
             $twig_config['cache'] = static::$config->twig->cache_dir;
         }
 
+        // Figure out what domain we're on, and load the theme configured for that domain
+        $domain = \CuteControllers\Request::Current()->host;
+        $event = \OpenHack\Models\Event::GetEventByDomain($domain);
+        $template_dir = pathify($event->theme->directory, 'tpl');
+
         // Actually load Twig
-        $twig_loader = new Twig_Loader_Filesystem(static::$dir->assets->tpl);
-        static::$twig = new Twig_Environment($twig_loader, $twig_conifg);
+        $twig_loader = new \Twig_Loader_Filesystem(pathify(static::$dir->themes, $template_dir));
+        static::$twig = new \Twig_Environment($twig_loader, $twig_conifg);
 
         // Twig can only load plugins after it's been loaded, but can only enable debugging before it's been loaded. So
         // we need to do another check if debugging is on so we can load the debug extension.
-        if (static::$config->debug === TRUE) {
-            $twig->addExtension(new Twig_Extension_Debug());
+        if (static::$config->debug === true) {
+            $twig->addExtension(new \Twig_Extension_Debug());
         }
+    }
+
+    /**
+     * Generates a connection string from a database connection config object
+     * @param  object $db_config Database connection config from config file
+     * @return string            MDB2 connection string
+     */
+    private static function generate_connection_string($db_config)
+    {
+        if ($db_config === null) {
+            return $db_config;
+        }
+        return implode('', [
+                            $db_config->type,
+                            '://',
+                            $db_config->username,
+                            ':',
+                            $db_config->password,
+                            '@',
+                            $db_config->host,
+                            '/',
+                            $db_config->db
+                        ]);
     }
 
     /**
@@ -83,7 +106,10 @@ class Application
      */
     private static function load_database()
     {
-        \TinyDb\Db::set();
+        \TinyDb\Db::set(
+                            self::generate_connection_string(static::$config->database->read),
+                            self::generate_connection_string(static::$config->database->write)
+                        );
     }
 
     /**
@@ -108,8 +134,8 @@ class Application
         static::set_directories();
         static::load_config();
         static::load_spl_loader();
-        static::load_twig();
         static::load_database();
+        static::load_twig();
         static::start_routing();
     }
 }
