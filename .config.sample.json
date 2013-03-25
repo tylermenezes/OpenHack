@@ -12,15 +12,12 @@
 
     "debug": false,
 
-    "twig" {
-        "cache_dir": null
-    },
-
-    "twig" {
+    "twig": {
+        "cache_dir": null,
         "cache": null
     },
 
-    "language": "en-US",
+    "management_domain": "localhost",
 
     "twilio": {
         "account_sid": null,

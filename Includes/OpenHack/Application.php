@@ -21,7 +21,9 @@ class Application
             'includes' => pathify($webroot, 'Includes'),
             'plugins' => pathify($webroot, 'Plugins'),
             'controllers' => pathify($webroot, 'Includes', 'OpenHack', 'Controllers'),
-            'themes' => pathify($webroot, 'themes')
+            'themes' => pathify($webroot, 'themes'),
+            'assets' => pathify($webroot, 'assets'),
+            'management_templates' => pathify($webroot, 'assets', 'tpl')
         ];
     }
 
@@ -64,8 +66,18 @@ class Application
 
         // Figure out what domain we're on, and load the theme configured for that domain
         $domain = \CuteControllers\Request::Current()->host;
-        $event = \OpenHack\Models\Event::GetEventByDomain($domain);
-        $template_dir = pathify($event->theme->directory, 'tpl');
+
+        if (static::$config->management_domain === $domain) { // Load the admin pages
+            $template_dir = static::$dir->management_templates;
+        } else { // Load the site template
+            try {
+                $event = \OpenHack\Models\Event::GetEventByDomain($domain);
+            } catch (\TinyDb\NoRecordException $ex) { // Show 404 page
+                header('Status: 404 File Not Found');
+                exit;
+            }
+            $template_dir = pathify($event->theme->directory, 'tpl');
+        }
 
         // Actually load Twig
         $twig_loader = new \Twig_Loader_Filesystem(pathify(static::$dir->themes, $template_dir));
